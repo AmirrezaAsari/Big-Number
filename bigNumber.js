@@ -199,6 +199,11 @@ class BigNumber {
         let result = new BigNumber("0");
         let baghimande = new BigNumber("");
         let adder = new BigNumber("1");
+        x.removeZero();
+        if(x.#intDigits[0] == 0){
+            result.#intDigits[0] = undefined;
+            return result;
+        }
         if (!(x instanceof BigNumber)) {
             return "error. Arguments should be BigNumber type";
         }
@@ -248,6 +253,82 @@ class BigNumber {
         return result;
 
     }
+
+    multiply(x){
+        if (!(x instanceof BigNumber)) {
+            return "error. Arguments should be BigNumber type";
+        }  
+
+        let counter = new BigNumber("1");
+        let result = new BigNumber("");
+        let xSign = "+";
+        let thisSign = "+";
+
+        if(x.#sign == "-") {
+            xSign = "-";
+        }
+        if(this.#sign == "-") {
+            thisSign = "-";
+        }
+
+        this.#sign = "+";
+        x.#sign = "+";
+
+        if(thisSign != xSign){
+            while(x.#intDigits[0] != 0){
+                result = result.sum(this);
+                x = x.diff(counter);
+                counter.removeZero();
+                x.removeZero();
+            }
+            result.#sign = "-";
+        }
+        else{
+            while(x.#intDigits[0] != 0){
+                result = result.sum(this);
+                x = x.diff(counter);
+                counter.removeZero();
+                x.removeZero();
+            }
+            result.#sign = "+";
+        }
+        x.#sign = xSign;
+        this.#sign = thisSign;
+        return result;
+    }
+
+    pow(x){
+        if (!(x instanceof BigNumber)) {
+            return "error. Arguments should be BigNumber type";
+        }
+
+        let counter = new BigNumber("1");
+        let result = new BigNumber("1");
+
+        let xSign = "+";
+        let thisSign = "+";
+        if(x.#sign == "-") {
+            xSign = "-";
+        }
+        if(this.#sign == "-") {
+            thisSign = "-";
+        }
+
+        while(x.#intDigits[0] != 0){
+            result = result.multiply(this);
+            x = x.diff(counter);
+            counter.removeZero();
+            x.removeZero();
+        }
+        x.#sign = xSign;
+        this.#sign = thisSign;
+        result.#sign = "+";
+
+        return result;
+        
+    }
+
+
 
     isBiggerThan(x){
         if(this.#intDigits.sign == "+" && x.#intDigits.sign == "-") return true;
@@ -319,9 +400,9 @@ class BigNumber {
 
 }
 
-const num1 = new BigNumber("128", "-");
-const num2 = new BigNumber("2", "+");
-const result = num1.division(num2);
+const num1 = new BigNumber("123456", "+");
+const num2 = new BigNumber("100", "+");
+const result = num1.pow(num2);
 num1.isEqualTo(num2);
 num1.print();
 num2.print();
