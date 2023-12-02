@@ -1,33 +1,20 @@
 //RootKid
-
 class BigNumber {
     #intDigits = [];
-    #sign = "";
+    #sign = "+";
 
-    constructor(digits, sign) {
+    constructor(digits, sign = "+") {
         digits = String(digits);
         this.#intDigits = digits.split("").map(Number);
-        if(sign != "-"){
-            this.sign = "+"
-        }
-        else{
-            this.sign = "-"
-        }
+        this.#sign = sign;
     }
 
     sum(x) {
-        if(this.#sign == "-"){
-
+        if (!(x instanceof BigNumber)) {
+            return "error. Arguments should be BigNumber type";
         }
-        else if(x.#sign == "-"){
-
-        }
-        else{
-            let c = new BigNumber(0);
-            if (!(x instanceof BigNumber)) {
-                return "error. Arguments should be BigNumber type";
-            }
-    
+        let c = new BigNumber(0);
+        if(this.#sign == "-" && x.#sign =="-"){
             let i = 1;
             let carry = 0;
             let n1 = x.#intDigits.length;
@@ -45,9 +32,35 @@ class BigNumber {
             if (carry > 0) {
                 c.#intDigits.unshift(carry);
             }
-            return c;
+            c.#sign = "-";
+        }
+        else if(this.#sign == "-"){
+            c = x.diff(this);
+        }
+        else if(x.#sign == "-"){
+            c = this.diff(x);
         }
         
+        else{
+            let i = 1;
+            let carry = 0;
+            let n1 = x.#intDigits.length;
+            let n2 = this.#intDigits.length;
+            let n = Math.max(n1, n2);
+    
+            while (n > 0) {
+                let m = (x.#intDigits[n1 - i] || 0) + (this.#intDigits[n2 - i] || 0) + carry;
+                c.#intDigits[n-1] = m%10;
+                carry = Math.floor(m / 10);
+                i++;
+                n--;
+            }
+    
+            if (carry > 0) {
+                c.#intDigits.unshift(carry);
+            }
+        }
+        return c;
     }
 
     diff(x){
@@ -173,10 +186,11 @@ class BigNumber {
     isEqualTo(x){
         if(this.#intDigits.length == x.#intDigits.length){
             for(let i=0; i<this.#intDigits.length; i++) {
-                if(this.#intDigits[i] == x.#intDigits[i]){
-                    return true;
+                if(this.#intDigits[i] != x.#intDigits[i]){
+                    return false;
                 }
             }
+            return true;
         }
         else{
             return false;
@@ -186,10 +200,11 @@ class BigNumber {
 
     removeZero(){
         let i = 0;
-        while(this.#intDigits[i] == 0){    
-            if(this.#intDigits.length == 1) break;  
+        while(this.#intDigits[i] == 0){ 
+            if(this.#intDigits[i] != 0) break;   
+            if(this.#intDigits.length == 1 ) break;  
             this.#intDigits.shift();
-            i++;     
+    
         }
     }
 
@@ -204,9 +219,10 @@ class BigNumber {
 
 }
 
-const num1 = new BigNumber("1222", "+");
-const num2 = new BigNumber("1222", "+");
-const result = num1.diff(num2);
+const num1 = new BigNumber("1222", "-");
+const num2 = new BigNumber("1022", "-");
+const result = num1.sum(num2);
+num1.isEqualTo(num2);
 num1.print();
 num2.print();
 result.print();
