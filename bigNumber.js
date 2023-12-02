@@ -68,52 +68,57 @@ class BigNumber {
         if (!(x instanceof BigNumber)) {
             return "error. Arguments should be BigNumber type";
         }
+
         let i = 1;
         let carry = 0;
         let n1 = x.#intDigits.length;
         let n2 = this.#intDigits.length;
         let n = Math.max(n1, n2);
-        if(n2>n1){
-            for(let i = n1; i<n2; i++){
-                x.#intDigits.unshift(0);
-                n1++;
-            }
-            while(n>0){
-                let m = (this.#intDigits[n2 - i]) - (x.#intDigits[n1 - i]) - carry;
-                if(m<0) {
-                    m += 10;
-                    carry = 1;
-                }
-                else{
-                    carry = 0;
-                }
-                result.#intDigits.unshift(m);
-                i++;
-                n--;
-            }
+
+        if(this.#sign == "-" && x.#sign =="-"){
+            let tmpX = x;
+            let tmpThis = this;
+            tmpX.#sign = "+";
+            tmpThis.#sign = "+";
+            result = tmpX.diff(tmpThis);
+            this.#sign = "-";
+            x.#sign = "-";
         }
-        else if(n1>n2){
-            for(let i = n2; i<n1; i++){
-                this.#intDigits.unshift(0);
-                n2++;
-            }
-            while(n>0){
-                let m = (x.#intDigits[n1 - i] ) - (this.#intDigits[n2 - i]) - carry;
-                if(m<0) {
-                    m += 10;
-                    carry = 1;
-                }
-                else{
-                    carry = 0;
-                }
-                result.#intDigits.unshift(m);
+        else if(this.#sign == "-"){
+            while (n > 0) {
+                let m = (x.#intDigits[n1 - i] || 0) + (this.#intDigits[n2 - i] || 0) + carry;
+                result.#intDigits[n-1] = m%10;
+                carry = Math.floor(m / 10);
                 i++;
                 n--;
+            }
+    
+            if (carry > 0) {
+                result.#intDigits.unshift(carry);
             }
             result.#sign = "-";
         }
+        else if(x.#sign == "-"){
+
+            while (n > 0) {
+                let m = (x.#intDigits[n1 - i] || 0) + (this.#intDigits[n2 - i] || 0) + carry;
+                result.#intDigits[n-1] = m%10;
+                carry = Math.floor(m / 10);
+                i++;
+                n--;
+            }
+    
+            if (carry > 0) {
+                result.#intDigits.unshift(carry);
+            }
+            result.#sign = "+";
+        }
         else{
-            if(this.isBiggerThan(x)){
+            if(n2>n1){
+                for(let i = n1; i<n2; i++){
+                    x.#intDigits.unshift(0);
+                    n1++;
+                }
                 while(n>0){
                     let m = (this.#intDigits[n2 - i]) - (x.#intDigits[n1 - i]) - carry;
                     if(m<0) {
@@ -128,7 +133,11 @@ class BigNumber {
                     n--;
                 }
             }
-            else if(this.isSmallerThan(x)){
+            else if(n1>n2){
+                for(let i = n2; i<n1; i++){
+                    this.#intDigits.unshift(0);
+                    n2++;
+                }
                 while(n>0){
                     let m = (x.#intDigits[n1 - i] ) - (this.#intDigits[n2 - i]) - carry;
                     if(m<0) {
@@ -144,15 +153,50 @@ class BigNumber {
                 }
                 result.#sign = "-";
             }
-            else if(this.isEqualTo(x)){
-                result.#intDigits[0] = 0;
+            else{
+                if(this.isBiggerThan(x)){
+                    while(n>0){
+                        let m = (this.#intDigits[n2 - i]) - (x.#intDigits[n1 - i]) - carry;
+                        if(m<0) {
+                            m += 10;
+                            carry = 1;
+                        }
+                        else{
+                            carry = 0;
+                        }
+                        result.#intDigits.unshift(m);
+                        i++;
+                        n--;
+                    }
+                }
+            else if(this.isSmallerThan(x)){
+                    while(n>0){
+                        let m = (x.#intDigits[n1 - i] ) - (this.#intDigits[n2 - i]) - carry;
+                        if(m<0) {
+                            m += 10;
+                            carry = 1;
+                        }
+                        else{
+                            carry = 0;
+                        }
+                        result.#intDigits.unshift(m);
+                        i++;
+                        n--;
+                    }
+                    result.#sign = "-";
+                }
+                else if(this.isEqualTo(x)){
+                    result.#intDigits[0] = 0;
+                }
             }
         }
+        
 
         return result;
     }
 
     isBiggerThan(x){
+        if(this.#intDigits.sign == "+" && x.#intDigits.sign == "-") return true;
         if(this.#intDigits.length > x.#intDigits.length){
             return true;
         }
@@ -169,6 +213,7 @@ class BigNumber {
         
     }
     isSmallerThan(x){
+        if(x.#intDigits.sign == "+" && this.#intDigits.sign == "-") return true;
         if(this.#intDigits.length < x.#intDigits.length){
             return true;
         }
@@ -184,6 +229,7 @@ class BigNumber {
         }
     }
     isEqualTo(x){
+        if(x.#intDigits.sign != this.#intDigits.sign ) return false;
         if(this.#intDigits.length == x.#intDigits.length){
             for(let i=0; i<this.#intDigits.length; i++) {
                 if(this.#intDigits[i] != x.#intDigits[i]){
@@ -220,8 +266,8 @@ class BigNumber {
 }
 
 const num1 = new BigNumber("1222", "-");
-const num2 = new BigNumber("1022", "-");
-const result = num1.sum(num2);
+const num2 = new BigNumber("1022", "+");
+const result = num1.diff(num2);
 num1.isEqualTo(num2);
 num1.print();
 num2.print();
