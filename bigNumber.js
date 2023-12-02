@@ -314,6 +314,10 @@ class BigNumber {
             thisSign = "-";
         }
 
+        this.#sign = "+";
+        x.#sign = "+";
+
+
         while(x.#intDigits[0] != 0){
             result = result.multiply(this);
             x = x.diff(counter);
@@ -328,7 +332,31 @@ class BigNumber {
         
     }
 
+    factorial(){
+        let counter = new BigNumber("1");
+        let result = new BigNumber("1");
+        let x = this;
+        let xSign = "+";
+        let thisSign = "+";
+        if(x.#sign == "-") {
+            xSign = "-";
+        }
+        if(this.#sign == "-") {
+            thisSign = "-";
+        }
 
+        while(x.#intDigits[0] != 0){
+            result = result.multiply(x);
+            x = x.diff(counter);
+            counter.removeZero();
+            x.removeZero();
+        }
+        x.#sign = xSign;
+        this.#sign = thisSign;
+        result.#sign = "+";
+
+        return result;
+    }
 
     isBiggerThan(x){
         if(this.#intDigits.sign == "+" && x.#intDigits.sign == "-") return true;
@@ -400,10 +428,9 @@ class BigNumber {
 
 }
 
-const num1 = new BigNumber("123456", "+");
-const num2 = new BigNumber("100", "+");
+const num1 = new BigNumber("20", "+");
+const num2 = new BigNumber("20", "+");
 const result = num1.pow(num2);
-num1.isEqualTo(num2);
 num1.print();
 num2.print();
 result.print();
