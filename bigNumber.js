@@ -195,6 +195,60 @@ class BigNumber {
         return result;
     }
 
+    division(x){
+        let result = new BigNumber("0");
+        let baghimande = new BigNumber("");
+        let adder = new BigNumber("1");
+        if (!(x instanceof BigNumber)) {
+            return "error. Arguments should be BigNumber type";
+        }
+
+        if(this.#sign == "-" && x.#sign =="-"){
+            this.#sign = "+";
+            x.#sign = "+";
+            baghimande = this;
+            while(baghimande.isBiggerThan(x) || baghimande.isEqualTo(x)){
+                baghimande = baghimande.diff(x);
+                result = result.sum(adder);
+            }
+            this.#sign = "-";
+            x.#sign = "-";
+            result.#sign = "+";
+        }
+        else if(this.#sign == "-"){
+            this.#sign = "+";
+            x.#sign = "+";
+            baghimande = this;
+            while(baghimande.isBiggerThan(x) || baghimande.isEqualTo(x)){
+                baghimande = baghimande.diff(x);
+                result = result.sum(adder);
+            }
+            this.#sign = "-";
+            result.#sign = "-";
+        }
+        else if(x.#sign == "-"){
+            this.#sign = "+";
+            x.#sign = "+";
+            baghimande = this;
+            while(baghimande.isBiggerThan(x) || baghimande.isEqualTo(x)){
+                baghimande = baghimande.diff(x);
+                result = result.sum(adder);
+            }
+            x.#sign = "-";
+            result.#sign = "-";
+        
+        }
+        else{
+            baghimande = this;
+            while(baghimande.isBiggerThan(x) || baghimande.isEqualTo(x)){
+                baghimande = baghimande.diff(x);
+                result = result.sum(adder);
+            }
+        }
+        return result;
+
+    }
+
     isBiggerThan(x){
         if(this.#intDigits.sign == "+" && x.#intDigits.sign == "-") return true;
         if(this.#intDigits.length > x.#intDigits.length){
@@ -265,9 +319,9 @@ class BigNumber {
 
 }
 
-const num1 = new BigNumber("1222", "-");
-const num2 = new BigNumber("1022", "+");
-const result = num1.diff(num2);
+const num1 = new BigNumber("128", "-");
+const num2 = new BigNumber("2", "+");
+const result = num1.division(num2);
 num1.isEqualTo(num2);
 num1.print();
 num2.print();
